@@ -6,8 +6,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Session } from './session';
-import { Role } from './role';
+import { Session } from './session.entity';
+import { Role } from './role.entity';
 
 @Entity('users')
 export class User {

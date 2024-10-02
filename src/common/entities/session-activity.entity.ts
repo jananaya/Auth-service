@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Session } from './session';
+import { Session } from './session.entity';
 
 @Entity('session_activities')
 export class SessionActivity {

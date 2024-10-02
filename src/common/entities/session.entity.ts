@@ -6,9 +6,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { SessionActivity } from './session-activity';
-import { SessionStatus } from './session-status';
-import { User } from './user';
+import { SessionActivity } from './session-activity.entity';
+import { SessionStatus } from './session-status.entity';
+import { User } from './user.entity';
 
 @Entity('sessions')
 export class Session {
