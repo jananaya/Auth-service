@@ -1,17 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import 'reflect-metadata';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { serverConfig } from './config/server.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT || 3000);
+  const config = new DocumentBuilder().build();
+  const document = SwaggerModule.createDocument(app, config);
 
-  const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',') || '*';
+  SwaggerModule.setup('api', app, document);
+
+  const allowedOrigins = serverConfig.allowedOrigins;
 
   app.enableCors({
     origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+
+  await app.listen(serverConfig.port);
 }
 bootstrap();
