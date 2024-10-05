@@ -20,8 +20,10 @@ export class UsersService {
   async create(user: CreateUserDto): Promise<UserDto> {
     const userExists = await this.userRepository
       .createQueryBuilder('user')
-      .where('user.username = :username', { username: user.username })
-      .orWhere('user.email = :email', { email: user.email })
+      .where('user.username = :username OR user.email = :email', {
+        username: user.username,
+        email: user.email,
+      })
       .getExists();
 
     if (userExists) {
