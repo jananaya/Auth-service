@@ -12,9 +12,9 @@ import * as bcrypt from 'bcryptjs';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
 
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(user: CreateUserDto): Promise<UserDto> {
