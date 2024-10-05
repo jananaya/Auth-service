@@ -17,6 +17,12 @@ export class UsersService {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Handles user registration, creates a new user, and returns the user data.
+   *
+   * @param {CreateUserDto} user - The user data transfer object containing the username, email, and password.
+   * @returns {Promise<UserDto>} Returns a promise resolving to an object containing the user ID, username, and email.
+   */
   async create(user: CreateUserDto): Promise<UserDto> {
     const userExists = await this.userRepository
       .createQueryBuilder('user')
