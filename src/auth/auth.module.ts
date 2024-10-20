@@ -20,7 +20,10 @@ import { Session } from 'src/common/entities/session.entity';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get('JWT_EXPIRATION') },
+        signOptions: {
+          expiresIn: configService.get('JWT_EXPIRATION'),
+          algorithm: 'HS256',
+        },
       }),
     }),
     TypeOrmModule.forFeature([

@@ -70,7 +70,7 @@ export class AuthService {
     const sessionEntity = this.sessionRepository.create({
       ...createSessionType,
       user,
-      sessionToken: '', // Will be populated after token generation
+      sessionToken: '',
       startTime: new Date(),
       lastActivity: new Date(),
       status: { statusId: SessionStatus.ACTIVE },
