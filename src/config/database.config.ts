@@ -12,4 +12,5 @@ export const databaseConfig = (
   database: configService.get<string>('DB_NAME'),
   autoLoadEntities: true,
   synchronize: false,
+  ssl: true,
 });
