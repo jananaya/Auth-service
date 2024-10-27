@@ -85,7 +85,10 @@ export class AuthService {
       sessionId: session.sessionId,
     };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.jwtConfig.secret,
+      expiresIn: this.jwtConfig.expiration,
+    });
 
     await this.sessionRepository.update(session.sessionId, {
       sessionToken: accessToken,
