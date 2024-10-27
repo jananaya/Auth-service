@@ -22,6 +22,8 @@ export class UsersService {
    *
    * @param {CreateUserDto} user - The user data transfer object containing the username, email, and password.
    * @returns {Promise<UserDto>} Returns a promise resolving to an object containing the user ID, username, and email.
+   *
+   * @throws {BadRequestException} Throws if the user already exists.
    */
   async create(user: CreateUserDto): Promise<UserDto> {
     const userExists = await this.userRepository
