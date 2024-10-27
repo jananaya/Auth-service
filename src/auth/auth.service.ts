@@ -25,6 +25,7 @@ export class AuthService {
     @InjectRepository(Session)
     private readonly sessionRepository: Repository<Session>,
 
+    @InjectRepository(SessionActivity)
     private readonly sessionActivityRepository: Repository<SessionActivity>,
 
     private readonly jwtService: JwtService,
