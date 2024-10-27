@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from 'src/common/entities/user.entity';
 import { Session } from 'src/common/entities/session.entity';
+import { SessionActivity } from 'src/common/entities/session-activity.entity';
 import { LoginDto } from './dtos/login.dto';
 import { CreateSessionType } from './create-session.interface';
 import { JwtService } from '@nestjs/jwt';
@@ -23,6 +24,8 @@ export class AuthService {
 
     @InjectRepository(Session)
     private readonly sessionRepository: Repository<Session>,
+
+    private readonly sessionActivityRepository: Repository<SessionActivity>,
 
     private readonly jwtService: JwtService,
 
@@ -104,5 +107,53 @@ export class AuthService {
       refreshToken,
       expiresIn: this.jwtConfig.expiration,
     };
+  }
+
+  /**
+   * Handles user logout and invalidates the session by setting the session status to CLOSED.
+   *
+   * @param {number} sessionId - The ID of the session to invalidate.
+   * @param {number} userId - The ID of the user to whom the session belongs.
+   * @returns {Promise<void>} Returns a promise that resolves when the session is invalidated.
+   *
+   * @throws {UnauthorizedException} Throws if the session is not found.
+   * @throws {UnauthorizedException} Throws if the session is already closed.
+   */
+  async logout(sessionId: number, userId: number): Promise<void> {
+    const session = await this.sessionRepository
+      .createQueryBuilder('session')
+      .where(
+        'session.sessionId = :sessionId AND session.user.userId = :userId',
+        {
+          sessionId,
+          userId,
+        },
+      )
+      .innerJoin('session.user', 'user')
+      .innerJoinAndSelect('session.status', 'status')
+      .getOne();
+
+    if (!session) {
+      throw new UnauthorizedException('Session not found');
+    }
+
+    if (session.status.statusId === SessionStatus.CLOSED) {
+      throw new UnauthorizedException('Session already closed');
+    }
+    const logoutTime = new Date();
+
+    await this.sessionRepository.update(sessionId, {
+      status: { statusId: SessionStatus.CLOSED },
+      lastActivity: logoutTime,
+      endTime: logoutTime,
+    });
+
+    const sessionActivity = this.sessionActivityRepository.create({
+      action: 'LOGOUT',
+      actionTimestamp: logoutTime,
+      session,
+    });
+
+    await this.sessionActivityRepository.save(sessionActivity);
   }
 }
