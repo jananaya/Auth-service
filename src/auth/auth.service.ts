@@ -73,7 +73,7 @@ export class AuthService {
       sessionToken: '',
       startTime: new Date(),
       lastActivity: new Date(),
-      status: { statusId: SessionStatus.ACTIVE },
+      status: { statusId: SessionStatus.OPEN },
     });
 
     const session = await this.sessionRepository.save(sessionEntity);
