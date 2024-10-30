@@ -10,11 +10,12 @@ import {
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateSessionPipe } from './create-session.pipe';
 import { JwtResponseDto } from './dtos/jwt-response.dto';
 import { AuthGuard } from './auth.guard';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -35,6 +36,7 @@ export class AuthController {
     return this.authService.login(loginDto, createSessionDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)

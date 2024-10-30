@@ -1,9 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('app')
 @Controller()
 export class AppController {
   @Get()
   getHome(): string {
-    return 'SafeAccess API is running!';
+    return 'Auth service API is running!';
   }
 }
