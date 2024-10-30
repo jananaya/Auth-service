@@ -70,17 +70,25 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException('Invalid password');
     }
+    const loginTime = new Date();
 
     const sessionEntity = this.sessionRepository.create({
       ...createSessionType,
       user,
       sessionToken: '',
-      startTime: new Date(),
-      lastActivity: new Date(),
+      startTime: loginTime,
+      lastActivity: loginTime,
       status: { statusId: SessionStatus.OPEN },
     });
 
     const session = await this.sessionRepository.save(sessionEntity);
+    const sessionActivity = this.sessionActivityRepository.create({
+      action: 'LOGIN',
+      actionTimestamp: loginTime,
+      session,
+    });
+
+    await this.sessionActivityRepository.save(sessionActivity);
 
     const payload = {
       userId: user.userId,
