@@ -165,4 +165,60 @@ export class AuthService {
 
     await this.sessionActivityRepository.save(sessionActivity);
   }
+
+  /**
+   * Handles token refresh by verifying the refresh token and returning a new access token.
+   *
+   * @param {number} sessionId - The ID of the session to refresh.
+   * @param {number} userId - The ID of the user to whom the session belongs.
+   * @returns {Promise<JwtResponseDto>} Returns a promise resolving to an object containing the access token,
+   * refresh token, and expiration time.
+   *
+   * @throws {UnauthorizedException} Throws if the session is not found.
+   */
+  async refresh(sessionId: number, userId: number): Promise<JwtResponseDto> {
+    const session = await this.sessionRepository
+      .createQueryBuilder('session')
+      .where(
+        'session.sessionId = :sessionId AND session.user.userId = :userId',
+        {
+          sessionId,
+          userId,
+        },
+      )
+      .innerJoinAndSelect('session.user', 'user')
+      .innerJoinAndSelect('user.role', 'role')
+      .getOne();
+
+    if (!session) {
+      throw new UnauthorizedException('Session not found');
+    }
+
+    const payload = {
+      userId: session.user.userId,
+      username: session.user.username,
+      role: session.user.role.name,
+      sessionId: session.sessionId,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.jwtConfig.secret,
+      expiresIn: this.jwtConfig.expiration,
+    });
+
+    await this.sessionRepository.update(sessionId, {
+      sessionToken: accessToken,
+    });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: this.jwtConfig.refreshSecret,
+      expiresIn: this.jwtConfig.refreshExpiration,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn: this.jwtConfig.expiration,
+    };
+  }
 }
