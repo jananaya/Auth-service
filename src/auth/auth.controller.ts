@@ -45,4 +45,15 @@ export class AuthController {
 
     await this.authService.logout(sessionId, userId);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: HttpStatus.OK, type: JwtResponseDto })
+  async refresh(@Req() req: Request): Promise<JwtResponseDto> {
+    const { userId, sessionId } = req['user'];
+
+    return this.authService.refresh(sessionId, userId);
+  }
 }
