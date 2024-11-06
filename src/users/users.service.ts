@@ -3,16 +3,20 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UserDto } from './dtos/user.dto';
 import { Repository } from 'typeorm';
 import { User } from 'src/common/entities/user.entity';
-import { Role } from '../roles/enums/role.enum';
+import { Role as ERole } from '../roles/enums/role.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { Role } from 'src/common/entities/role.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
 
     private readonly configService: ConfigService,
   ) {}
@@ -37,6 +41,15 @@ export class UsersService {
     if (userExists) {
       throw new BadRequestException('User already exists');
     }
+
+    const role = await this.roleRepository.findOne({
+      where: { roleId: user.roleId },
+    });
+
+    if (!role || user.roleId === ERole.ADMIN) {
+      throw new BadRequestException('Invalid role');
+    }
+
     const salt = Number(this.configService.get('HASH_SALT'));
 
     const userEntity = {
@@ -44,7 +57,7 @@ export class UsersService {
       email: user.email,
       passwordHash: bcrypt.hashSync(user.password, salt),
       createdAt: new Date(),
-      role: { roleId: Role.USER },
+      role: { roleId: user.roleId },
     };
     const createdUser = this.userRepository.create(userEntity);
 
